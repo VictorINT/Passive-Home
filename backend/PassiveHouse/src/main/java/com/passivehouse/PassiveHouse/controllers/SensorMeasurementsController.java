@@ -18,8 +18,12 @@ public class SensorMeasurementsController {
         this.sensorMeasurementsService = sensorMeasurementsService;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<SensorMeasurement> getAllSensorMeasurements(){
         return sensorMeasurementsService.getAllSensorMeasurements();
+    }
+    @GetMapping("/last")
+    public SensorMeasurement getLastSensorMeasurement(){
+        return sensorMeasurementsService.getLastSensorMeasurement();
     }
 }
