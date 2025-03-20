@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Data Upload</title>
+</head>
+<body>
+<h2>Upload Sensor Data</h2>
+<form id="sensorForm">
+    <label>Temperature: <input type="number" step="0.01" id="temperature" required></label><br>
+    <label>Humidity: <input type="number" step="0.01" id="humidity" required></label><br>
+    <label>Light 1: <input type="number" step="0.01" id="light1" required></label><br>
+    <label>Light 2: <input type="number" step="0.01" id="light2" required></label><br>
+    <label>Light 3: <input type="number" step="0.01" id="light3" required></label><br>
+    <label>Voltage 1: <input type="number" step="0.01" id="voltage1" required></label><br>
+    <label>Voltage 2: <input type="number" step="0.01" id="voltage2" required></label><br>
+    <label>Current 1: <input type="number" step="0.01" id="current1" required></label><br>
+    <label>Current 2: <input type="number" step="0.01" id="current2" required></label><br>
+    <button type="button" onclick="submitData()">Send Data</button>
+</form>
+<p id="response"></p>
+
+<script>
+    function submitData() {
+        const data = {
+            temperature: parseFloat(document.getElementById('temperature').value),
+            humidity: parseFloat(document.getElementById('humidity').value),
+            light1: parseFloat(document.getElementById('light1').value),
+            light2: parseFloat(document.getElementById('light2').value),
+            light3: parseFloat(document.getElementById('light3').value),
+            voltage1: parseFloat(document.getElementById('voltage1').value),
+            voltage2: parseFloat(document.getElementById('voltage2').value),
+            current1: parseFloat(document.getElementById('current1').value),
+            current2: parseFloat(document.getElementById('current2').value)
+        };
+
+        fetch('http://localhost:8080/sensors/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.text())
+        .then(text => document.getElementById('response').innerText = 'Response: ' + text)
+        .catch(error => document.getElementById('response').innerText = 'Error: ' + error);
+    }
+</script>
+</body>
+</html>

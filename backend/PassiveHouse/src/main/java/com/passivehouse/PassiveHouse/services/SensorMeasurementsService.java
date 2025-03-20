@@ -17,6 +17,10 @@ public class SensorMeasurementsService {
         this.repo = repo;
     }
 
+    public SensorMeasurement uploadSensorMeasurement(SensorMeasurement sm) {
+        return repo.save(sm);
+    }
+
     public List<SensorMeasurement> getAllSensorMeasurements() {
         return repo.findAll();
     }
