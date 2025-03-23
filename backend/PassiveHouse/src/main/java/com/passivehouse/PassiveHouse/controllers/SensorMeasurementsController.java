@@ -39,8 +39,9 @@ public class SensorMeasurementsController {
      */
     @PostMapping("/upload")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> uploadSensorMeasurement(@RequestBody SensorMeasurement sm){
-        SensorMeasurement uploadedSM = sensorMeasurementsService.uploadSensorMeasurement(sm);
+    public ResponseEntity<?> uploadSensorMeasurement(@RequestBody SensorMeasurement sensorMeasurement){
+        System.out.println(sensorMeasurement.getId() + ";" + sensorMeasurement.getTimestamp() + ";" + sensorMeasurement.getTemperature() + ";" + sensorMeasurement.getHumidity() + ";" + sensorMeasurement.getLight1()+ ";" + sensorMeasurement.getLight2() + ";" + sensorMeasurement.getLight3()+ ";" + sensorMeasurement.getVoltage1() + ";" + sensorMeasurement.getVoltage2() + ";" + sensorMeasurement.getCurrent1() + ";" + sensorMeasurement.getCurrent2());
+        SensorMeasurement uploadedSM = sensorMeasurementsService.uploadSensorMeasurement(sensorMeasurement);
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadedSM);
     }
 }

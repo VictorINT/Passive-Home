@@ -2,8 +2,11 @@ package com.passivehouse.PassiveHouse.services;
 
 import com.passivehouse.PassiveHouse.models.SensorMeasurement;
 import com.passivehouse.PassiveHouse.repositories.SensorMeasurementsRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,10 +16,30 @@ public class SensorMeasurementsService {
 
     private final SensorMeasurementsRepository repo;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     public SensorMeasurementsService(SensorMeasurementsRepository repo) {
         this.repo = repo;
     }
 
+    public void saveSensorData(SensorMeasurement sensorMeasurement) {
+        String sql = "INSERT INTO sensor_measurements (timestamp, temperature, humidity, light1, light2, light3, voltage1, voltage2, current1, current2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        jdbcTemplate.update(sql,
+                sensorMeasurement.getTimestamp(),
+                sensorMeasurement.getTemperature(),
+                sensorMeasurement.getHumidity(),
+                sensorMeasurement.getLight1(),
+                sensorMeasurement.getLight2(),
+                sensorMeasurement.getLight3(),
+                sensorMeasurement.getVoltage1(),
+                sensorMeasurement.getVoltage2(),
+                sensorMeasurement.getCurrent1(),
+                sensorMeasurement.getCurrent2());
+    }
+
+    @Transactional
     public SensorMeasurement uploadSensorMeasurement(SensorMeasurement sm) {
         return repo.save(sm);
     }

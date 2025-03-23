@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:async'; // Add Timer import
 import 'pages/sensor_detail_page.dart';
-import 'services/sensor_service.dart';
-import 'models/sensor_data.dart';
-import 'dart:async';
+import 'pages/sensor_graph_page.dart';
+import 'pages/login_page.dart';
+import 'services/auth_service.dart';
+import 'services/sensor_service.dart'; // Add SensorService import
+import 'models/sensor_data.dart'; // Add SensorData import
 
 void main() {
   runApp(const MyApp());
@@ -11,46 +14,71 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Passive House Monitor',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Passive House Monitor'),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AuthWrapper(),
+        '/home': (context) => const MyHomePage(title: 'Passive House Monitor'),
+        '/details': (context) => const SensorDetailPage(),
+        '/graphs': (context) => const SensorGraphPage(),
+      },
     );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  final AuthService _authService = AuthService();
+  bool _isLoading = true;
+  bool _isAuthenticated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+  }
+
+  Future<void> _checkAuthStatus() async {
+    final isLoggedIn = await _authService.isLoggedIn();
+    setState(() {
+      _isAuthenticated = isLoggedIn;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_isAuthenticated) {
+      return const MyHomePage(title: 'Passive House Monitor');
+    } else {
+      return const LoginPage();
+    }
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -60,6 +88,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final SensorService _sensorService = SensorService();
+  final AuthService _authService = AuthService();
   SensorData? _sensorData;
   bool _isLoading = true;
   String? _error;
@@ -96,23 +125,26 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> _handleSignOut() async {
+    await _authService.signOut();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, '/');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _handleSignOut,
+            tooltip: 'Sign Out',
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -122,10 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ? const Center(child: Text('No data available'))
                   : GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SensorDetailPage()),
-                        );
+                        Navigator.pushNamed(context, '/details');
                       },
                       child: Container(
                         margin: const EdgeInsets.all(16.0),
@@ -142,35 +171,46 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ],
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        child: Column(
                           children: [
-                            _buildSensorItem(
-                              'Temperature',
-                              '${_sensorData!.temperature}°C',
-                              Icons.thermostat,
-                              Colors.orange,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildSensorItem(
+                                  'Temperature',
+                                  '${_sensorData!.temperature}°C',
+                                  Icons.thermostat,
+                                  Colors.orange,
+                                ),
+                                _buildDivider(),
+                                _buildSensorItem(
+                                  'Humidity',
+                                  '${_sensorData!.humidity}%',
+                                  Icons.water_drop,
+                                  Colors.blue,
+                                ),
+                                _buildDivider(),
+                                _buildSensorItem(
+                                  'Light',
+                                  '${_sensorData!.light1}%',
+                                  Icons.lightbulb,
+                                  Colors.yellow,
+                                ),
+                                _buildDivider(),
+                                _buildSensorItem(
+                                  'Power',
+                                  '${_sensorData!.voltage1}V',
+                                  Icons.electric_bolt,
+                                  Colors.purple,
+                                ),
+                              ],
                             ),
-                            _buildDivider(),
-                            _buildSensorItem(
-                              'Humidity',
-                              '${_sensorData!.humidity}%',
-                              Icons.water_drop,
-                              Colors.blue,
-                            ),
-                            _buildDivider(),
-                            _buildSensorItem(
-                              'Light',
-                              '${_sensorData!.light1}%',
-                              Icons.lightbulb,
-                              Colors.yellow,
-                            ),
-                            _buildDivider(),
-                            _buildSensorItem(
-                              'Power',
-                              '${_sensorData!.voltage1}V',
-                              Icons.electric_bolt,
-                              Colors.purple,
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/graphs');
+                              },
+                              child: const Text('View Historical Data'),
                             ),
                           ],
                         ),

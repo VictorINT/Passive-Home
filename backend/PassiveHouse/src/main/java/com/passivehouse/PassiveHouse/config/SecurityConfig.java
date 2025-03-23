@@ -12,32 +12,32 @@ import org.slf4j.LoggerFactory;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-    
+
     @Autowired
     private CustomOAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         logger.info("Configuring security");
-        
+
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login/**", "/oauth2/**", "/error", "/test").permitAll()
-                .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .authorizationEndpoint(authorization -> authorization
-                    .baseUri("/oauth2/authorization")
+                .csrf(csrf -> csrf.disable())  // Dezactivează CSRF pentru WebSocket
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/login/**", "/oauth2/**", "/error", "/test", "/ws/sensors").permitAll()  // Permite accesul WebSocket fără autentificare
+                        .anyRequest().authenticated()  // Restul protejate cu OAuth2
                 )
-                .redirectionEndpoint(redirection -> redirection
-                    .baseUri("/login/oauth2/code/*")
-                )
-                .successHandler(oauth2AuthenticationSuccessHandler)
-            );
-        
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/oauth2/authorization")
+                        )
+                        .redirectionEndpoint(redirection -> redirection
+                                .baseUri("/login/oauth2/code/*")
+                        )
+                        .successHandler(oauth2AuthenticationSuccessHandler)
+                );
+
         return http.build();
     }
-} 
+}
