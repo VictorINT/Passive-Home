@@ -1,11 +1,11 @@
 <script setup>
-import SensorData from '@/components/SensorData.vue';
+import Sensors from './components/Sensors.vue';
 </script>
 
 <template>
   <div>
     <h1>Smart Home Dashboard</h1>
-    <SensorData />
+    <Sensors />
   </div>
 </template>
 
