@@ -1,5 +1,6 @@
 <script setup>
 import Sensors from './components/Sensors.vue';
+import ControlCenter from './components/ControlCenter.vue';
 </script>
 
 <template>
@@ -7,6 +8,8 @@ import Sensors from './components/Sensors.vue';
     <div class="dashboard-container">
       <h1>Smart Home Dashboard</h1>
       <Sensors />
+      <h1>Control center</h1>
+      <ControlCenter />
     </div>
   </div>
 </template>

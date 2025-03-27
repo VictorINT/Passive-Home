@@ -8,5 +8,6 @@ public class PassiveHouseApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PassiveHouseApplication.class, args);
+
 	}
-	
+}
