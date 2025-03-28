@@ -52,6 +52,7 @@ uint8_t RxBuffer[RX_BUFFER_SIZE] = {0};
 uint8_t RxData[RX_BUFFER_SIZE] = {0};
 uint8_t RxIndex = 0;
 uint8_t RxCompleteFlag = 0;
+uint8_t paritate = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -121,9 +122,13 @@ int main(void)
   {
 	  if (RxCompleteFlag)
 	      {
+		  if(paritate == 0)
+			  	 paritate = 1;
+		  else
+			  paritate=0;
 	        // Send back the received data
-	        HAL_UART_Transmit(&huart2, RxData, RxIndex, HAL_MAX_DELAY);
-		  sendString("data recieved");
+//	        HAL_UART_Transmit(&huart2, RxData, RxIndex, HAL_MAX_DELAY);
+//		  sendString("data recieved");
 	        // Reset for next reception
 	        RxIndex = 0;
 	        RxCompleteFlag = 0;
@@ -131,18 +136,18 @@ int main(void)
 	        // Restart interrupt reception
 	        HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
 	      }
-//    float temperature = getTemp();
-//    //! to string
-//    if (temperature != -1.0f)
-//    {
-//        snprintf(buffer, sizeof(buffer), "%.2f\r\n", temperature);
-//        sendString(buffer);
-//    }
-//
+    float temperature = getTemp();
+    //! to string
+    if (temperature != -1.0f)
+    {
+        snprintf(buffer, sizeof(buffer), "%.2f\r\n", temperature);
+        sendString(buffer);
+    }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//    HAL_Delay(100);
+    HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -336,7 +341,6 @@ static float getTemp(void){
     float temperature;      // Temperature in Celsius.
     if (HAL_I2C_Mem_Read(&hi2c1, TMP102_ADDR, 0x00, I2C_MEMADD_SIZE_8BIT, tempData, 2, HAL_MAX_DELAY) != HAL_OK)
     {
-        printf("Reading error I2C!\n");
         return -1.0f;
     }
     rawTemp = (int16_t)((tempData[0] << 4) | (tempData[1] >> 4));
@@ -368,7 +372,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
                 RxCompleteFlag = 1;
 
                 // Turn on Blue LED
-                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+                if(paritate == 0)
+                	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+                else
+                	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
             }
             else
             {

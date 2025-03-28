@@ -23,7 +23,7 @@ public class WebSocketController extends TextWebSocketHandler {
             SensorMeasurement measurement = new ObjectMapper().readValue(payload, SensorMeasurement.class);
             sensorMeasurementRepository.save(measurement);
             System.out.println("Sensor data received and saved: " + measurement);
-            session.sendMessage(new org.springframework.web.socket.TextMessage("Data received successfully!"));
+//            session.sendMessage(new org.springframework.web.socket.TextMessage("Data received successfully!"));
         } catch (Exception e) {
             session.sendMessage(new org.springframework.web.socket.TextMessage("Error parsing sensor data"));
         }

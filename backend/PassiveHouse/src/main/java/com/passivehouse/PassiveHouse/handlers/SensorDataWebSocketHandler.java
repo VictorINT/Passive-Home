@@ -52,7 +52,7 @@ public class SensorDataWebSocketHandler extends TextWebSocketHandler {
         }
 
         // Broadcast the received message to all WebSocket clients
-        broadcast(payload);
+//        broadcast(payload);
     }
 
     @Override
