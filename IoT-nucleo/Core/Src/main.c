@@ -2,7 +2,8 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
+  * @brief          : Main program body for temperature monitoring with
+  *                   serial RX LED indication
   ******************************************************************************
   * @attention
   *
@@ -22,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,6 +34,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define TMP102_ADDR 0x48 << 1 // sensor address
+#define RX_BUFFER_SIZE 1024 // DMA-UART2 buffer size
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,14 +48,17 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint8_t RxBuffer[RX_BUFFER_SIZE] = {0};
+uint8_t RxData[RX_BUFFER_SIZE] = {0};
+uint8_t RxIndex = 0;
+uint8_t RxCompleteFlag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 static void sendString(char *str);
 static float getTemp(void);
@@ -92,28 +98,51 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
   MX_I2C1_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  // Start UART reception with interrupts
+
+
+  char buffer[128];
+  sendString("Enter a word:");
+  HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+// 	  HAL_UART_Receive(&huart2, RxBuffer, RX_BUFFER_SIZE, 5000);
+// 	  HAL_Delay(100);
+// 	  sendString((char*)RxBuffer);
+// 	  HAL_Delay(1000);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  char buffer[128];
   while (1)
   {
-	  float temperature = getTemp();
-	  //! to string
-	  if (temperature != -1.0f)
-	  {
-	      snprintf(buffer, sizeof(buffer), "%.2f\r\n", temperature);
-	      sendString(buffer);
-	  }
+	  if (RxCompleteFlag)
+	      {
+	        // Send back the received data
+	        HAL_UART_Transmit(&huart2, RxData, RxIndex, HAL_MAX_DELAY);
+		  sendString("data recieved");
+	        // Reset for next reception
+	        RxIndex = 0;
+	        RxCompleteFlag = 0;
+
+	        // Restart interrupt reception
+	        HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+	      }
+//    float temperature = getTemp();
+//    //! to string
+//    if (temperature != -1.0f)
+//    {
+//        snprintf(buffer, sizeof(buffer), "%.2f\r\n", temperature);
+//        sendString(buffer);
+//    }
+//
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_Delay(1000);
+//    HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -265,7 +294,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -273,12 +305,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
+  /*Configure GPIO pin : PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -288,22 +327,62 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 static void sendString(char *str)
 {
-	HAL_UART_Transmit(&huart2, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart2, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
 }
 
 static float getTemp(void){
-	//! get temperature from I2C
-	uint8_t tempData[2];    // Buffer
-	int16_t rawTemp;        //
-	float temperature;      // Temperature in Celsius.
-	if (HAL_I2C_Mem_Read(&hi2c1, TMP102_ADDR, 0x00, I2C_MEMADD_SIZE_8BIT, tempData, 2, HAL_MAX_DELAY) != HAL_OK)
-	    {
-	        printf("Reading error I2C!\n");
-	        return -1.0f;
-	    }
-	    rawTemp = (int16_t)((tempData[0] << 4) | (tempData[1] >> 4));
-	    temperature = rawTemp * 0.0625f;  // TMP102 0.0625°C.
-	    return temperature;
+    uint8_t tempData[2];    // Buffer
+    int16_t rawTemp;        //
+    float temperature;      // Temperature in Celsius.
+    if (HAL_I2C_Mem_Read(&hi2c1, TMP102_ADDR, 0x00, I2C_MEMADD_SIZE_8BIT, tempData, 2, HAL_MAX_DELAY) != HAL_OK)
+    {
+        printf("Reading error I2C!\n");
+        return -1.0f;
+    }
+    rawTemp = (int16_t)((tempData[0] << 4) | (tempData[1] >> 4));
+    temperature = rawTemp * 0.0625f;  // TMP102 0.0625°C.
+    return temperature;
+}
+
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//    HAL_UART_Receive_IT(&huart2, RxBuffer, RX_BUFFER_SIZE);
+//    sendString("message recieved");
+//    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);    // Blue LED
+//}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+        // Check if we haven't filled the buffer
+        if (RxIndex < RX_BUFFER_SIZE - 1)
+        {
+            // Store the received byte
+            RxData[RxIndex++] = RxBuffer[0];
+
+            // Check for end of message (newline or carriage return)
+            if (RxBuffer[0] == '\r' || RxBuffer[0] == '\n')
+            {
+                RxData[RxIndex] = '\0';  // Null-terminate the string
+                RxCompleteFlag = 1;
+
+                // Turn on Blue LED
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+            }
+            else
+            {
+                // Continue receiving next byte
+                HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+            }
+        }
+        else
+        {
+            // Buffer full, reset
+            RxIndex = 0;
+            HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
+        }
+    }
 }
 
 /* USER CODE END 4 */
