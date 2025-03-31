@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
+#include "serialjson.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,7 +35,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define TMP102_ADDR 0x48 << 1 // sensor address
-#define RX_BUFFER_SIZE 1024 // DMA-UART2 buffer size
+#define RX_BUFFER_SIZE 256 // DMA-UART2 buffer size
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -122,17 +123,15 @@ int main(void)
   {
 	  if (RxCompleteFlag)
 	      {
-		  if(paritate == 0)
-			  	 paritate = 1;
-		  else
-			  paritate=0;
-	        // Send back the received data
-//	        HAL_UART_Transmit(&huart2, RxData, RxIndex, HAL_MAX_DELAY);
-//		  sendString("data recieved");
-	        // Reset for next reception
 	        RxIndex = 0;
 	        RxCompleteFlag = 0;
-
+	        Pair *pairs = json_to_pairs((char*)RxData);
+	        int index = 0;
+	        while(pairs[index].name != NULL){
+	        	execute_function(get_by_name(ITEMS, pairs[index].name), pairs[index].num_values, pairs[index].int_values);
+	        	index++;
+	        }
+	        free_pairs(pairs);
 	        // Restart interrupt reception
 	        HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
 	      }
@@ -370,12 +369,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             {
                 RxData[RxIndex] = '\0';  // Null-terminate the string
                 RxCompleteFlag = 1;
-
-                // Turn on Blue LED
-                if(paritate == 0)
-                	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-                else
-                	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
             }
             else
             {
@@ -390,6 +383,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
         }
     }
+}
+
+int led1_function(int argc, int* argv){
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, argv[0]);
+		return 0;
 }
 
 /* USER CODE END 4 */

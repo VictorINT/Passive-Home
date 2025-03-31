@@ -1,0 +1,2 @@
+../Core/Src/jlib/jsonlib.c:3:7:json_to_pairs	43
+../Core/Src/jlib/jsonlib.c:207:6:free_pairs	3

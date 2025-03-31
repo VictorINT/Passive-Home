@@ -20,6 +20,7 @@ public class InstructionsController {
         try {
             // Broadcast the received JSON directly to WebSocket clients
             webSocketHandler.broadcast(jsonInstruction);
+            System.out.println(jsonInstruction);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(jsonInstruction);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing JSON");

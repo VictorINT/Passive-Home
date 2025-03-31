@@ -1,0 +1,2 @@
+../Core/Src/dfunc/fdex.c:3:5:execute_function	32	static
+../Core/Src/dfunc/fdex.c:7:6:get_by_name	40	static
