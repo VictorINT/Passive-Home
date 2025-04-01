@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { defineComponent } from 'vue';
 import Navbar from '../components/Navbar.vue';
-// You can add additional logic here if needed
+import Sensors from '../components/Sensors.vue';
+import ControlCenter from '../components/ControlCenter.vue';
 </script>
 
 <template>
@@ -8,11 +10,13 @@ import Navbar from '../components/Navbar.vue';
     <Navbar />
     <main class="content">
       <section class="section">
-        <h1 class="section-title">Statistics Page</h1>
-        <!-- Add additional content or components here -->
-        <div class="statistics-placeholder">
-          <p></p>
-        </div>
+        <h1 class="section-title">Your House</h1>
+        <Sensors />
+      </section>
+      
+      <section class="section">
+        <h1 class="section-title">Control Center</h1>
+        <ControlCenter />
       </section>
     </main>
   </div>
@@ -28,6 +32,7 @@ import Navbar from '../components/Navbar.vue';
 }
 
 .content {
+  /* padding: clamp(1rem, 5vw, 2rem); */
   max-width: 90vw;
   margin: 0 auto;
   width: 100%;
@@ -44,26 +49,9 @@ import Navbar from '../components/Navbar.vue';
 .section-title {
   color: #4caf50;
   font-size: clamp(1.2rem, 4vw, 1.8rem);
-  margin-bottom: clamp(0.5rem, 2vh, 1rem);
+  margin-bottom: clamp(0.75rem, 3vh, 1.5rem);
   border-bottom: 2px solid #333;
   padding-bottom: clamp(0.25rem, 1vh, 0.5rem);
-}
-
-.description {
-  font-size: clamp(0.9rem, 3vw, 1.1rem);
-  margin-bottom: clamp(1rem, 4vh, 2rem);
-  color: #e0e0e0;
-}
-
-.statistics-placeholder {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: clamp(150px, 40vh, 300px);
-  background-color: #2a2a2a;
-  border-radius: clamp(0.5rem, 2vw, 0.75rem);
-  color: #888;
-  font-size: clamp(1rem, 3vw, 1.2rem);
 }
 
 @media (min-width: 768px) {
