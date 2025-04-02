@@ -62,12 +62,12 @@ onUnmounted(() => {
           <div class="sensor-label">Avg Light</div>
         </div>
         <div class="sensor-card">
-          <div class="sensor-icon">💡</div>
+          <div class="sensor-icon">⚡</div>
           <div class="sensor-value">{{ sensorData.current1.toFixed(2) }}</div>
           <div class="sensor-label">Consumed Power</div>
         </div>
         <div class="sensor-card">
-          <div class="sensor-icon">💡</div>
+          <div class="sensor-icon">⚡</div>
           <div class="sensor-value">{{ sensorData.current2.toFixed(2) }}</div>
           <div class="sensor-label">Produced power</div>
         </div>

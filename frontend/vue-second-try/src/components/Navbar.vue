@@ -45,7 +45,7 @@ onUnmounted(() => {
       
       <ul class="navbar-links" :class="{ 'active': isMenuOpen }">
         <li class="navbar-item">
-          <router-link to="/" class="navbar-link" @click="closeMenu">Home</router-link>
+          <router-link to="/" exact class="navbar-link" @click="closeMenu">Home</router-link>
         </li>
         <li class="navbar-item">
           <router-link to="/stats" class="navbar-link" @click="closeMenu">Statistics</router-link>

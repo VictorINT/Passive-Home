@@ -48,27 +48,23 @@ const toggleLed = async (led: number) => {
 </script>
 
 <style scoped>
-
 .control-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: clamp(0.5rem, 2vw, 1rem);
-  padding: clamp(0.75rem, 3vw, 1rem);
+  gap: 1rem;
+  padding: 1rem;
   background-color: #2a2a2a;
-  border-radius: clamp(0.5rem, 2vw, 0.75rem);
+  border-radius: 8px;
 }
 
 .control-button {
-  flex: 1;
-  min-width: clamp(100px, 25vw, 200px);
-  padding: clamp(0.5rem, 3vh, 0.75rem) clamp(0.75rem, 2vw, 1.5rem);
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
   font-weight: bold;
   border: none;
   cursor: pointer;
   background-color: #555;
   color: white;
-  border-radius: clamp(0.25rem, 1vw, 0.5rem);
+  border-radius: 6px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
@@ -85,11 +81,5 @@ const toggleLed = async (led: number) => {
 
 .control-button.on:hover {
   background-color: #5dbd60;
-}
-
-@media (min-width: 768px) {
-  .control-button {
-    min-width: 120px;
-  }
 }
 </style>
