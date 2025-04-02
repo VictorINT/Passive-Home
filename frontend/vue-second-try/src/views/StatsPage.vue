@@ -20,12 +20,17 @@ interface SensorEntry {
 
 const sensorData = ref<SensorEntry[]>([]);
 
+// Function to format timestamp to show day and time
+const formatTimestamp = (timestamp: string) => {
+  const date = new Date(timestamp);
+  // Format: "Mon 14:30" (Weekday + time)
+  return date.toLocaleDateString('en-US', { weekday: 'short' }) + ' ' + 
+         date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+};
+
 // Prepare chart data for temperature
 const temperatureChartData = computed(() => ({
-  labels: sensorData.value.map(entry => {
-    // Format timestamp or use as is
-    return new Date(entry.timestamp).toLocaleTimeString();
-  }),
+  labels: sensorData.value.map(entry => formatTimestamp(entry.timestamp)),
   datasets: [
     {
       label: 'Temperature',
@@ -39,7 +44,7 @@ const temperatureChartData = computed(() => ({
 
 // Humidity chart data
 const humidityChartData = computed(() => ({
-  labels: sensorData.value.map(entry => new Date(entry.timestamp).toLocaleTimeString()),
+  labels: sensorData.value.map(entry => formatTimestamp(entry.timestamp)),
   datasets: [
     {
       label: 'Humidity',
@@ -53,7 +58,7 @@ const humidityChartData = computed(() => ({
 
 // Light levels chart data
 const lightChartData = computed(() => ({
-  labels: sensorData.value.map(entry => new Date(entry.timestamp).toLocaleTimeString()),
+  labels: sensorData.value.map(entry => formatTimestamp(entry.timestamp)),
   datasets: [
     {
       label: 'Light 1',
@@ -81,7 +86,7 @@ const lightChartData = computed(() => ({
 
 // Power consumption chart data
 const powerChartData = computed(() => ({
-  labels: sensorData.value.map(entry => new Date(entry.timestamp).toLocaleTimeString()),
+  labels: sensorData.value.map(entry => formatTimestamp(entry.timestamp)),
   datasets: [
     {
       label: 'Current 1',
@@ -100,7 +105,7 @@ const powerChartData = computed(() => ({
   ]
 }));
 
-// Chart options
+// Chart options with specific x-axis tick settings for weekly data
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -110,13 +115,32 @@ const chartOptions = {
       grid: { color: '#333333' }
     },
     x: {
-      ticks: { color: '#aaaaaa', maxRotation: 45, minRotation: 45 },
+      ticks: { 
+        color: '#aaaaaa', 
+        maxRotation: 45, 
+        minRotation: 45,
+        autoSkip: true,
+        maxTicksLimit: 15 // Adjust based on your data density
+      },
       grid: { color: '#333333' }
     }
   },
   plugins: {
     legend: {
       labels: { color: '#ffffff' }
+    },
+    tooltip: {
+      callbacks: {
+        title: function(tooltipItems) {
+          // Show full date+time in tooltip
+          const item = tooltipItems[0];
+          const timestamp = sensorData.value[item.dataIndex]?.timestamp;
+          if (timestamp) {
+            return new Date(timestamp).toLocaleString();
+          }
+          return '';
+        }
+      }
     }
   }
 };
@@ -131,6 +155,9 @@ const fetchSensorData = async (): Promise<void> => {
 
     if (!response.ok) throw new Error('Error fetching data');
     sensorData.value = await response.json();
+    
+    // Sort data by timestamp if needed
+    sensorData.value.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   } catch (error) {
     console.error('Fetch error:', error);
     sensorData.value = [];
@@ -169,7 +196,7 @@ onMounted(fetchSensorData);
           </div>
 
           <div class="chart-container">
-            <h2>Power(Produced and Consumed)</h2>
+            <h2>Power Consumption</h2>
             <div class="chart-wrapper">
               <Line :data="powerChartData" :options="chartOptions" />
             </div>

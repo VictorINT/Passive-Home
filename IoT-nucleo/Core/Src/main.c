@@ -103,7 +103,6 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
   // Start UART reception with interrupts
 
 
@@ -140,9 +139,8 @@ int main(void)
     if (temperature != -1.0f)
     {
         snprintf(buffer, sizeof(buffer), "%.2f\r\n", temperature);
-        sendString(buffer);
+//        sendString(buffer);
     }
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -316,12 +314,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PA8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pin : PB5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -388,6 +396,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 int led1_function(int argc, int* argv){
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, argv[0]);
 		return 0;
+}
+
+//! interrupt function for PIR sensor.
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	sendString("PIR_ACTIVATED!");
 }
 
 /* USER CODE END 4 */
