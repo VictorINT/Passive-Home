@@ -17,3 +17,4 @@ This project is a smart home automation system designed for a passive house. It 
 - **Real-time Communication**: WebSockets (Python)
 - **Database**: MySQL (Dockerized)
 
+![passive house arh](https://github.com/user-attachments/assets/2a9cd245-573d-4be3-afca-04a8af0b320b)
