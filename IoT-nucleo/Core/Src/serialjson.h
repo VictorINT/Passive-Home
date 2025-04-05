@@ -9,6 +9,7 @@
  */
 
 int led1_function(int argc, int *argv);
+int ledband(int argc, int *argv);
 
 /**
  * Declare the items with their names and functions
@@ -17,6 +18,7 @@ int led1_function(int argc, int *argv);
 
 Item ITEMS[] = {
     {"led1", led1_function},
+	{"ledband", ledband},
     {NULL, NULL} // Sentinel value to mark the end of the array
 };
 

@@ -12,17 +12,25 @@
     >
       LED 2
     </button>
+
+    <div class="color-picker-container">
+      <!-- <label for="colorPicker">Pick LED Band Color:</label> -->
+      <input id="colorPicker" type="color" v-model="hexColor" />
+      <button class="control-button" @click="sendLedColor">
+        Send Color
+      </button>
+    </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref } from 'vue';
 
-// Define data types
 const led1 = ref<number>(0);
 const led2 = ref<number>(0);
+const hexColor = ref<string>('#00ff00'); // default green
 
-// Toggle LED state
 const toggleLed = async (led: number) => {
   if (led === 1) {
     led1.value = led1.value ? 0 : 1;
@@ -45,9 +53,47 @@ const toggleLed = async (led: number) => {
     console.error('Error sending request:', error);
   }
 };
+
+const sendLedColor = async () => {
+  const rgb = hexToRgb(hexColor.value);
+  if (!rgb) return;
+
+  const payload = { ledband: [rgb.r, rgb.g, rgb.b] };
+
+  try {
+    await fetch('http://localhost:8080/instructions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      mode: 'cors',
+      credentials: 'include',
+    });
+  } catch (error) {
+    console.error('Error sending LED color:', error);
+  }
+};
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+}
 </script>
 
 <style scoped>
+.color-picker-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  color: white;
+}
+
 .control-container {
   display: flex;
   gap: 1rem;
