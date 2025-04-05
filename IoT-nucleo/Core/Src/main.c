@@ -107,7 +107,6 @@ int main(void)
 
 
   char buffer[128];
-  sendString("Enter a word:");
   HAL_UART_Receive_IT(&huart2, RxBuffer, 1);
 // 	  HAL_UART_Receive(&huart2, RxBuffer, RX_BUFFER_SIZE, 5000);
 // 	  HAL_Delay(100);
@@ -139,7 +138,8 @@ int main(void)
     if (temperature != -1.0f)
     {
         snprintf(buffer, sizeof(buffer), "%.2f\r\n", temperature);
-//        sendString(buffer);
+        sendString("t:");
+        sendString(buffer);
     }
     /* USER CODE END WHILE */
 
@@ -307,17 +307,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PA1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PA8 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PB5 */
@@ -328,6 +328,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
@@ -401,7 +404,9 @@ int led1_function(int argc, int* argv){
 //! interrupt function for PIR sensor.
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-	sendString("PIR_ACTIVATED!");
+	if(GPIO_Pin == GPIO_PIN_1){
+	        sendString("pir\n");
+	}
 }
 
 /* USER CODE END 4 */
