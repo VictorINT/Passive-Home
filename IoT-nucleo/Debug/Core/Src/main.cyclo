@@ -13,4 +13,5 @@
 ../Core/Src/main.c:524:6:ws2812_send	1
 ../Core/Src/main.c:531:6:ws2812_update_all	8
 ../Core/Src/main.c:558:6:HAL_GPIO_EXTI_Callback	1
-../Core/Src/main.c:570:6:Error_Handler	1
+../Core/Src/main.c:564:6:HAL_TIM_PWM_PulseFinishedCallback	2
+../Core/Src/main.c:579:6:Error_Handler	1

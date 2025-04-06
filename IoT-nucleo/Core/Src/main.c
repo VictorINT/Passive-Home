@@ -561,6 +561,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	}
 }
 
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
+{
+    if(htim->Instance == TIM1)
+    {
+    	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
+    }
+}
+
+
 /* USER CODE END 4 */
 
 /**

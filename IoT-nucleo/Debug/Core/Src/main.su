@@ -13,4 +13,5 @@
 ../Core/Src/main.c:524:6:ws2812_send	8	static
 ../Core/Src/main.c:531:6:ws2812_update_all	32	static
 ../Core/Src/main.c:558:6:HAL_GPIO_EXTI_Callback	16	static
-../Core/Src/main.c:570:6:Error_Handler	8	static,ignoring_inline_asm
+../Core/Src/main.c:564:6:HAL_TIM_PWM_PulseFinishedCallback	16	static
+../Core/Src/main.c:579:6:Error_Handler	8	static,ignoring_inline_asm
