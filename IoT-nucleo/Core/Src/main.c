@@ -119,7 +119,6 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   MX_TIM1_Init();
-//  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   /* USER CODE BEGIN 2 */
   // Start UART reception with interrupts
 
@@ -557,7 +556,7 @@ void ws2812_update_all(uint8_t colors[MAX_LEDS][3]) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	if(GPIO_Pin == GPIO_PIN_1){
-//	        sendString("pir\n");
+	        sendString("PIR\n");
 	}
 }
 
