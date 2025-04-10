@@ -1,7 +1,9 @@
 package com.passivehouse.PassiveHouse.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.passivehouse.PassiveHouse.SSE.PirSSEController;
 import com.passivehouse.PassiveHouse.models.SensorMeasurement;
+import com.passivehouse.PassiveHouse.services.AlarmService;
 import com.passivehouse.PassiveHouse.services.SensorMeasurementsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,17 +16,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Component
 public class SensorDataWebSocketHandler extends TextWebSocketHandler {
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
     private final SensorMeasurementsService sensorMeasurementsService;
+    private final ObjectMapper objectMapper;
+    private final AlarmService alarmService;
+    private final PirSSEController pirSSEController;
 
     private final CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
 
     @Autowired
-    public SensorDataWebSocketHandler(SensorMeasurementsService sensorMeasurementsService){
+    public SensorDataWebSocketHandler(
+            SensorMeasurementsService sensorMeasurementsService,
+            ObjectMapper objectMapper,
+            AlarmService alarmService,
+            PirSSEController pirSSEController
+    ) {
         this.sensorMeasurementsService = sensorMeasurementsService;
+        this.objectMapper = objectMapper;
+        this.alarmService = alarmService;
+        this.pirSSEController = pirSSEController;
     }
 
     @Override
@@ -34,12 +43,27 @@ public class SensorDataWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         String payload = message.getPayload();
         System.out.println("Received: " + payload);
 
-        // Process as SensorMeasurement
         try {
+            if (payload.contains("PIR")) {
+                if (alarmService.isAlarmActive()) {
+                    System.out.println("ALARM ACTIVE: triggering SSE");
+                    pirSSEController.sendAlarmEvent();
+                } else {
+                    System.out.println("Alarm is off. Ignoring PIR.");
+                }
+                return;
+            }
+
+            if (payload.contains("RFID")) {
+                // TODO: handle RFID logic here
+                return;
+            }
+
+            // Try to parse as SensorMeasurement
             SensorMeasurement sensorMeasurement = objectMapper.readValue(payload, SensorMeasurement.class);
             sensorMeasurementsService.uploadSensorMeasurement(sensorMeasurement);
             System.out.println(sensorMeasurement.getId() + ";" + sensorMeasurement.getTimestamp() + ";" +
@@ -50,9 +74,6 @@ public class SensorDataWebSocketHandler extends TextWebSocketHandler {
         } catch (Exception e) {
             System.err.println("Invalid SensorMeasurement JSON, treating as raw message.");
         }
-
-        // Broadcast the received message to all WebSocket clients
-//        broadcast(payload);
     }
 
     @Override

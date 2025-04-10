@@ -12,9 +12,14 @@
     >
       LED 2
     </button>
+    <button 
+      :class="['control-button', { 'on': alarmActive }]" 
+      @click="toggleAlarm"
+    >
+      Alarm
+    </button>
 
     <div class="color-picker-container">
-      <!-- <label for="colorPicker">Pick LED Band Color:</label> -->
       <input id="colorPicker" type="color" v-model="hexColor" />
       <button class="control-button" @click="sendLedColor">
         Send Color
@@ -23,13 +28,13 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const led1 = ref<number>(0);
 const led2 = ref<number>(0);
 const hexColor = ref<string>('#00ff00'); // default green
+const alarmActive = ref<boolean>(false);
 
 const toggleLed = async (led: number) => {
   if (led === 1) {
@@ -50,7 +55,7 @@ const toggleLed = async (led: number) => {
       credentials: 'include',
     });
   } catch (error) {
-    console.error('Error sending request:', error);
+    console.error('Error sending LED request:', error);
   }
 };
 
@@ -83,6 +88,36 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
       }
     : null;
 }
+
+const toggleAlarm = async () => {
+  alarmActive.value = !alarmActive.value;
+
+  try {
+    await fetch('http://localhost:8080/alarm/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: alarmActive.value }),
+      mode: 'cors',
+      credentials: 'include',
+    });
+  } catch (error) {
+    console.error('Error toggling alarm:', error);
+  }
+};
+
+onMounted(async () => {
+  try {
+    const res = await fetch('http://localhost:8080/alarm/state', {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+    });
+    const state = await res.json();
+    alarmActive.value = state;
+  } catch (err) {
+    console.error("Error fetching alarm state:", err);
+  }
+});
 </script>
 
 <style scoped>
@@ -100,6 +135,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   padding: 1rem;
   background-color: #2a2a2a;
   border-radius: 8px;
+  flex-wrap: wrap;
 }
 
 .control-button {
