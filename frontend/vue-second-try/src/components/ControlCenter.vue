@@ -33,7 +33,7 @@ import { ref, onMounted } from 'vue';
 
 const led1 = ref<number>(0);
 const led2 = ref<number>(0);
-const hexColor = ref<string>('#00ff00'); // default green
+const hexColor = ref<string>('#00ff00');
 const alarmActive = ref<boolean>(false);
 
 const toggleLed = async (led: number) => {
@@ -105,7 +105,9 @@ const toggleAlarm = async () => {
   }
 };
 
+// 🔔 SSE + notificări
 onMounted(async () => {
+  // Inițializare stare alarmă
   try {
     const res = await fetch('http://localhost:8080/alarm/state', {
       method: 'GET',
@@ -117,7 +119,38 @@ onMounted(async () => {
   } catch (err) {
     console.error("Error fetching alarm state:", err);
   }
+
+  // Permisiune notificări
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission().then(permission => {
+    console.log("Notification permission:", permission);
+  });
+}
+
+  // Conectare SSE
+  const eventSource = new EventSource("http://localhost:8080/sse");
+
+  eventSource.addEventListener("ALARM", (event: MessageEvent) => {
+    console.log("SSE ALARM event:", event.data);
+    showPopupNotification("ALARM TRIGGERED", "Motion detected while alarm is active!");
+  });
+
+  eventSource.onerror = (err) => {
+    console.error("SSE error:", err);
+    eventSource.close();
+  };
 });
+
+function showPopupNotification(title: string, body: string) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    console.log("Creating notification:", title, body);
+    new Notification(title, {
+      body
+    });
+  } else {
+    alert(`${title}: ${body}`);
+  }
+}
 </script>
 
 <style scoped>

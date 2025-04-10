@@ -1,16 +1,16 @@
 package com.passivehouse.PassiveHouse.SSE;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 @RestController
+//@CrossOrigin(origins = "*")
 public class PirSSEController {
     private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 

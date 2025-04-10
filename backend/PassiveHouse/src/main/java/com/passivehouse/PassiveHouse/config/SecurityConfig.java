@@ -23,10 +23,18 @@ public class SecurityConfig {
         logger.info("Configuring security");
 
         http
-                .csrf(csrf -> csrf.disable())  // Dezactivează CSRF pentru WebSocket
+                .csrf(csrf -> csrf.disable()) // Dezactivează CSRF (necesar pentru WebSocket/SSE temporar)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/oauth2/**", "/error", "/test", "/ws/sensors").permitAll()  // Permite accesul WebSocket fără autentificare
-                        .anyRequest().authenticated()  // Restul protejate cu OAuth2
+                        .requestMatchers(
+                                "/",
+                                "/login/**",
+                                "/oauth2/**",
+                                "/error",
+                                "/test",
+                                "/ws/sensors",
+                                "/sse"               // ✅ Adăugat aici ca să fie accesibil fără login
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization -> authorization
