@@ -1,9 +1,13 @@
 package com.passivehouse.PassiveHouse.handlers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.passivehouse.PassiveHouse.SSE.PirSSEController;
+import com.passivehouse.PassiveHouse.models.RFID;
 import com.passivehouse.PassiveHouse.models.SensorMeasurement;
+import com.passivehouse.PassiveHouse.repositories.RFIDRepository;
 import com.passivehouse.PassiveHouse.services.AlarmService;
+import com.passivehouse.PassiveHouse.services.RFIDService;
 import com.passivehouse.PassiveHouse.services.SensorMeasurementsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,6 +15,7 @@ import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
@@ -20,6 +25,9 @@ public class SensorDataWebSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper objectMapper;
     private final AlarmService alarmService;
     private final PirSSEController pirSSEController;
+
+    @Autowired
+    private RFIDRepository rfidRepository;
 
     private final CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
 
@@ -55,22 +63,37 @@ public class SensorDataWebSocketHandler extends TextWebSocketHandler {
                 } else {
                     System.out.println("Alarm is off. Ignoring PIR.");
                 }
-                return;
             }
+            else if (payload.contains("RFID")) {
+                JsonNode node = objectMapper.readTree(payload);
+                String rfidTag = node.get("RFID").asText();
+                System.out.println(rfidTag);
 
-            if (payload.contains("RFID")) {
-                // TODO: handle RFID logic here
-                return;
+                List<RFID> rfids = rfidRepository.findAll();
+
+                for (RFID value : rfids) {
+                    if (value.getRfid_tag().equals(rfidTag)) {
+                        // access granted
+                        System.out.println("access granted for RFID: " + value.getRfid_tag());
+                        broadcast("[SPRING] access granted for RFID: " + value.getRfid_tag());
+                    }
+                    else{
+                        // access denied
+                        System.out.println("access denied for RFID: " + value.getRfid_tag());
+                        broadcast("[SPRING] access denied for RFID: " + value.getRfid_tag());
+                    }
+                }
             }
-
-            // Try to parse as SensorMeasurement
-            SensorMeasurement sensorMeasurement = objectMapper.readValue(payload, SensorMeasurement.class);
-            sensorMeasurementsService.uploadSensorMeasurement(sensorMeasurement);
-            System.out.println(sensorMeasurement.getId() + ";" + sensorMeasurement.getTimestamp() + ";" +
-                    sensorMeasurement.getTemperature() + ";" + sensorMeasurement.getHumidity() + ";" +
-                    sensorMeasurement.getLight1() + ";" + sensorMeasurement.getLight2() + ";" + sensorMeasurement.getLight3() + ";" +
-                    sensorMeasurement.getVoltage1() + ";" + sensorMeasurement.getVoltage2() + ";" +
-                    sensorMeasurement.getCurrent1() + ";" + sensorMeasurement.getCurrent2());
+            else {
+                // Try to parse as SensorMeasurement
+                SensorMeasurement sensorMeasurement = objectMapper.readValue(payload, SensorMeasurement.class);
+                sensorMeasurementsService.uploadSensorMeasurement(sensorMeasurement);
+//                System.out.println(sensorMeasurement.getId() + ";" + sensorMeasurement.getTimestamp() + ";" +
+//                        sensorMeasurement.getTemperature() + ";" + sensorMeasurement.getHumidity() + ";" +
+//                        sensorMeasurement.getLight1() + ";" + sensorMeasurement.getLight2() + ";" + sensorMeasurement.getLight3() + ";" +
+//                        sensorMeasurement.getVoltage1() + ";" + sensorMeasurement.getVoltage2() + ";" +
+//                        sensorMeasurement.getCurrent1() + ";" + sensorMeasurement.getCurrent2());
+            }
         } catch (Exception e) {
             System.err.println("Invalid SensorMeasurement JSON, treating as raw message.");
         }

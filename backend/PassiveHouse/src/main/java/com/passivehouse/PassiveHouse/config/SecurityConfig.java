@@ -23,7 +23,7 @@ public class SecurityConfig {
         logger.info("Configuring security");
 
         http
-                .csrf(csrf -> csrf.disable()) // Dezactivează CSRF (necesar pentru WebSocket/SSE temporar)
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
@@ -31,8 +31,8 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/error",
                                 "/test",
-                                "/ws/sensors",
-                                "/sse"               // ✅ Adăugat aici ca să fie accesibil fără login
+                                "/ws/sensors"
+                                ,"/sse"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
