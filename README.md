@@ -11,7 +11,7 @@ This project is a smart home automation system designed for a passive house. It 
 - **Vue.js Frontend**: Provides a user interface for monitoring and controlling the smart home.
 
 ## Technologies Used
-- **Embedded System**: STM32 (Bare-metal programming, C)
+- **Embedded System**: STM32 (Bare-metal programming, HAL, C)
 - **Backend**: Spring Boot (Java, MySQL, Hibernate, OAuth2)
 - **Frontend**: Vue.js (TypeScript, Vite)
 - **Real-time Communication**: WebSockets (Python)
