@@ -1,8 +1,7 @@
 <template>
   <div class="control-container">
-    <h2>Control Principal</h2>
-    <button :class="['control-button', { on: led1 }]" @click="toggleLed(1)">LED 1</button>
-    <button :class="['control-button', { on: led2 }]" @click="toggleLed(2)">LED 2</button>
+    <h2>Main Control</h2>
+    <button :class="['control-button', { on: led }]" @click="toggleLed">LED</button>
     <button :class="['control-button', { on: alarmActive }]" @click="toggleAlarm">Alarm</button>
   </div>
 </template>
@@ -10,15 +9,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-const led1 = ref(0)
-const led2 = ref(0)
+const led = ref(0)
 const alarmActive = ref(false)
 
-const toggleLed = async (led: number) => {
-  if (led === 1) led1.value = led1.value ? 0 : 1
-  if (led === 2) led2.value = led2.value ? 0 : 1
+const toggleLed = async () => {
+  led.value = led.value ? 0 : 1
 
-  const payload = led === 1 ? { led1: led1.value } : { led2: led2.value }
+  const payload = { led1: led.value } // backend expects 'led1'
 
   try {
     await fetch('http://localhost:8080/instructions', {
