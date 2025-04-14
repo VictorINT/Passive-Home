@@ -3,6 +3,8 @@ package com.passivehouse.PassiveHouse.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.passivehouse.PassiveHouse.models.SensorMeasurement;
 import com.passivehouse.PassiveHouse.repositories.SensorMeasurementsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketSession;
@@ -13,6 +15,8 @@ import java.io.IOException;
 @Controller
 public class WebSocketController extends TextWebSocketHandler {
 
+    private final Logger logger = LoggerFactory.getLogger(WebSocketController.class);
+
     @Autowired
     private SensorMeasurementsRepository sensorMeasurementRepository;
 
@@ -22,7 +26,8 @@ public class WebSocketController extends TextWebSocketHandler {
         try {
             SensorMeasurement measurement = new ObjectMapper().readValue(payload, SensorMeasurement.class);
             sensorMeasurementRepository.save(measurement);
-            System.out.println("Sensor data received and saved: " + measurement);
+//            System.out.println("Sensor data received and saved: " + measurement);
+            logger.info("Sensor data received and saved: {}", measurement);
 //            session.sendMessage(new org.springframework.web.socket.TextMessage("Data received successfully!"));
         } catch (Exception e) {
             session.sendMessage(new org.springframework.web.socket.TextMessage("Error parsing sensor data"));
