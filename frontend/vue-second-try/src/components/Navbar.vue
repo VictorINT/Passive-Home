@@ -50,6 +50,12 @@ onUnmounted(() => {
         <li class="navbar-item">
           <router-link to="/stats" class="navbar-link" @click="closeMenu">Statistics</router-link>
         </li>
+        <li class="navbar-item">
+          <router-link to="/light" class="navbar-link" @click="closeMenu">Lighting</router-link>
+        </li>
+        <li class="navbar-item">
+          <router-link to="/rfid" class="navbar-link" @click="closeMenu">RFID manager</router-link>
+        </li>
         <!-- <li class="navbar-item">
           <router-link to="/settings" class="navbar-link" @click="closeMenu">Settings</router-link>
         </li> -->
