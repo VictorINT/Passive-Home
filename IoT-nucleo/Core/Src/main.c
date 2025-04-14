@@ -37,11 +37,12 @@
 #define TMP102_ADDR 0x48 << 1 // sensor address
 #define RX_BUFFER_SIZE 256 // DMA-UART2 buffer size
 #define MAX_LEDS 72
+// 72
 #define BITS_PER_LED 24
 #define BUFSIZE          (MAX_LEDS * BITS_PER_LED)
 
-#define BIT_0           20          // Duty cycle 33% (valoare pentru logic '0')
-#define BIT_1           40          // Duty cycle 66% (valoare pentru logic '1')
+#define BIT_0           17          // Duty cycle 33% (valoare pentru logic '0')
+#define BIT_1           34          // Duty cycle 66% (valoare pentru logic '1')
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -62,7 +63,8 @@ uint8_t RxBuffer[RX_BUFFER_SIZE] = {0};
 uint8_t RxData[RX_BUFFER_SIZE] = {0};
 uint8_t RxIndex = 0;
 uint8_t RxCompleteFlag = 0;
-volatile uint16_t LED_Buffer[BUFSIZE]; // Buffer folosit de DMA pentru semnal PWM
+__attribute__((aligned(4))) volatile uint16_t LED_Buffer[BUFSIZE]; // Buffer folosit de DMA pentru semnal PWM
+uint8_t transferDone = 0;
 
 /* USER CODE END PV */
 
@@ -77,7 +79,7 @@ static void MX_TIM1_Init(void);
 static void sendString(char *str);
 static float getTemp(void);
 void ws2812_send();
-void ws2812_update_all(uint8_t colors[3][3]);
+void ws2812_update_all(int firstled, int lastled, uint8_t colors[MAX_LEDS][3]);
 
 /* USER CODE END PFP */
 
@@ -508,29 +510,33 @@ int led1_function(int argc, int* argv){
 
 int ledband(int argc, int* argv){
 	uint8_t all_red[72][3];
-
+	int firstled = argv[0];
+	int lastled = argv[1];
 	  for (int i = 0; i < 72; i++) {
-		  all_red[i][0] = argv[0];
-		  all_red[i][1] = argv[1];
-		  all_red[i][2] = argv[2];
+		  all_red[i][0] = argv[2];
+		  all_red[i][1] = argv[3];
+		  all_red[i][2] = argv[4];
 	  }
 
-	  ws2812_update_all(all_red);
+	  ws2812_update_all(firstled, lastled, all_red);
 
 		return 0;
 }
 
 void ws2812_send()
 {
+	transferDone = 0;
 	__HAL_TIM_SET_COUNTER(&htim1, 0);
     HAL_TIM_PWM_Start_DMA(&htim1, TIM_CHANNEL_1, (uint32_t*)LED_Buffer, BUFSIZE);
-    HAL_Delay(1); // >= 50 µs reset time (WS2812)
+    while (!transferDone);
+//    HAL_Delay(1); // >= 50 µs reset time (WS2812)
+    for (volatile int i = 0; i < 3000; i++); // delay brut ≈ 50-60µs
 }
 
-void ws2812_update_all(uint8_t colors[MAX_LEDS][3]) {
-    uint32_t index = 0;
-
-    for (uint8_t led = 0; led < MAX_LEDS; led++) {
+void ws2812_update_all(int firstled, int lastled, uint8_t colors[MAX_LEDS][3]) {
+    uint32_t index = firstled*24;
+    __disable_irq();
+    for (uint8_t led = firstled; led < lastled; led++) {
         uint8_t red   = colors[led][0];
         uint8_t green = colors[led][1];
         uint8_t blue  = colors[led][2];
@@ -547,7 +553,8 @@ void ws2812_update_all(uint8_t colors[MAX_LEDS][3]) {
             LED_Buffer[index++] = (blue & (1 << (7 - i))) ? BIT_1 : BIT_0;
         }
     }
-    HAL_Delay(200);
+    __enable_irq();
+//    HAL_Delay(200);
     ws2812_send();
 }
 
@@ -565,6 +572,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
     if(htim->Instance == TIM1)
     {
     	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
+    	transferDone = 1;
     }
 }
 

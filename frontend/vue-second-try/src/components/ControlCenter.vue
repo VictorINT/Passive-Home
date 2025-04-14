@@ -5,9 +5,25 @@
     <button :class="['control-button', { 'on': led2 }]" @click="toggleLed(2)">LED 2</button>
     <button :class="['control-button', { 'on': alarmActive }]" @click="toggleAlarm">Alarm</button>
 
-    <!-- Color Picker -->
+    <!-- Color Picker & LED Range -->
     <div class="color-picker-container">
       <input id="colorPicker" type="color" v-model="hexColor" />
+      <div class="led-range-container">
+        <input
+          type="number"
+          v-model.number="firstLed"
+          placeholder="First LED"
+          min="0"
+          class="range-input"
+        />
+        <input
+          type="number"
+          v-model.number="lastLed"
+          placeholder="Last LED"
+          :min="firstLed"
+          class="range-input"
+        />
+      </div>
       <button class="control-button" @click="sendLedColor">Send Color</button>
     </div>
 
@@ -41,6 +57,8 @@ import { ref, onMounted } from 'vue';
 const led1 = ref(0);
 const led2 = ref(0);
 const hexColor = ref('#00ff00');
+const firstLed = ref(0);
+const lastLed = ref(71);
 const alarmActive = ref(false);
 const rfidInput = ref('');
 const rfidList = ref<{ id: number; rfid_tag: string }[]>([]);
@@ -122,7 +140,9 @@ const sendLedColor = async () => {
   const rgb = hexToRgb(hexColor.value);
   if (!rgb) return;
 
-  const payload = { ledband: [rgb.r, rgb.g, rgb.b] };
+  const payload = {
+    ledband: [firstLed.value, lastLed.value, rgb.r, rgb.g, rgb.b],
+  };
 
   try {
     await fetch('http://localhost:8080/instructions', {
@@ -241,9 +261,25 @@ function showPopupNotification(title: string, body: string) {
 .color-picker-container,
 .rfid-container {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.led-range-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.range-input {
+  width: 6rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #333;
+  color: white;
 }
 
 .rfid-input {
