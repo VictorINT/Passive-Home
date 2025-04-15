@@ -29,6 +29,8 @@ public class SensorDataWebSocketHandler extends TextWebSocketHandler {
     private final AlarmService alarmService;
     private final PirSSEController pirSSEController;
 
+    private boolean yolo_flag = false;
+
     @Autowired
     private RFIDRepository rfidRepository;
 
@@ -73,7 +75,7 @@ public class SensorDataWebSocketHandler extends TextWebSocketHandler {
                 List<RFID> rfids = rfidRepository.findAll();
 
                 for (RFID value : rfids) {
-                    if (value.getRfid_tag().equals(rfidTag)) {
+                    if (value.getRfid_tag().equals(rfidTag) && yolo_flag) {
                         // access granted
                         logger.info("access granted for RFID: {}", value.getRfid_tag());
                         broadcast("[SPRING] access granted for RFID: " + value.getRfid_tag());
@@ -84,12 +86,12 @@ public class SensorDataWebSocketHandler extends TextWebSocketHandler {
                         broadcast("[SPRING] access denied for RFID: " + value.getRfid_tag());
                     }
                 }
-                // todo: if yolo_flag is set, send barrier servo instructions and garage door instructions
             }
             else if(payload.contains("YOLO")){
                 // todo: check if the plate number is on the white list
                 // todo: if yes, set flag
                 // todo: otherwise don't
+                // yolo_flag
             }
             else {
                 SensorMeasurement sensorMeasurement = objectMapper.readValue(payload, SensorMeasurement.class);
