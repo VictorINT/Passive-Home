@@ -1,8 +1,6 @@
-package com.passivehouse.PassiveHouse.controllers;
+package com.passivehouse.PassiveHouse.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.passivehouse.PassiveHouse.handlers.SensorDataWebSocketHandler;
+import com.passivehouse.PassiveHouse.handler.SensorDataWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +18,7 @@ public class InstructionsController {
     @PostMapping
     public ResponseEntity<?> uploadInstruction(@RequestBody String jsonInstruction) {
         try {
-            // Broadcast the received JSON directly to WebSocket clients
             webSocketHandler.broadcast(jsonInstruction);
-//            System.out.println(jsonInstruction);
             logger.info(jsonInstruction);
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(jsonInstruction);
         } catch (Exception e) {

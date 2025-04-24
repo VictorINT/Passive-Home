@@ -1,7 +1,7 @@
-package com.passivehouse.PassiveHouse.controllers;
+package com.passivehouse.PassiveHouse.controller;
 
-import com.passivehouse.PassiveHouse.models.RFID;
-import com.passivehouse.PassiveHouse.services.RFIDService;
+import com.passivehouse.PassiveHouse.model.RFID;
+import com.passivehouse.PassiveHouse.service.RFIDService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;

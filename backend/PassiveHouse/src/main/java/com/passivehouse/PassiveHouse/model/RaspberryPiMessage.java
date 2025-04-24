@@ -1,4 +1,4 @@
-package com.passivehouse.PassiveHouse.models;
+package com.passivehouse.PassiveHouse.model;
 
 public class RaspberryPiMessage {
     private String content;

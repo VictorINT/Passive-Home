@@ -1,7 +1,7 @@
-package com.passivehouse.PassiveHouse.services;
+package com.passivehouse.PassiveHouse.service;
 
-import com.passivehouse.PassiveHouse.models.RFID;
-import com.passivehouse.PassiveHouse.repositories.RFIDRepository;
+import com.passivehouse.PassiveHouse.model.RFID;
+import com.passivehouse.PassiveHouse.repository.RFIDRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

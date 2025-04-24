@@ -1,11 +1,9 @@
-package com.passivehouse.PassiveHouse.services;
+package com.passivehouse.PassiveHouse.service;
 
-import com.passivehouse.PassiveHouse.models.SensorMeasurement;
-import com.passivehouse.PassiveHouse.repositories.SensorMeasurementsRepository;
+import com.passivehouse.PassiveHouse.model.SensorMeasurement;
+import com.passivehouse.PassiveHouse.repository.SensorMeasurementsRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 

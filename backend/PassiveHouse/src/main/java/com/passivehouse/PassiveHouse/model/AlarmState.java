@@ -1,4 +1,4 @@
-package com.passivehouse.PassiveHouse.models;
+package com.passivehouse.PassiveHouse.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

@@ -1,13 +1,13 @@
-package com.passivehouse.PassiveHouse.handlers;
+package com.passivehouse.PassiveHouse.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.passivehouse.PassiveHouse.SSE.PirSSEController;
-import com.passivehouse.PassiveHouse.models.RFID;
-import com.passivehouse.PassiveHouse.models.SensorMeasurement;
-import com.passivehouse.PassiveHouse.repositories.RFIDRepository;
-import com.passivehouse.PassiveHouse.services.AlarmService;
-import com.passivehouse.PassiveHouse.services.SensorMeasurementsService;
+import com.passivehouse.PassiveHouse.model.RFID;
+import com.passivehouse.PassiveHouse.model.SensorMeasurement;
+import com.passivehouse.PassiveHouse.repository.RFIDRepository;
+import com.passivehouse.PassiveHouse.service.AlarmService;
+import com.passivehouse.PassiveHouse.service.SensorMeasurementsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

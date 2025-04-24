@@ -6,7 +6,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-import com.passivehouse.PassiveHouse.handlers.SensorDataWebSocketHandler;
+import com.passivehouse.PassiveHouse.handler.SensorDataWebSocketHandler;
 
 @Configuration
 @EnableWebSocket

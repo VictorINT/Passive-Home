@@ -1,7 +1,7 @@
-package com.passivehouse.PassiveHouse.services;
+package com.passivehouse.PassiveHouse.service;
 
-import com.passivehouse.PassiveHouse.models.AlarmState;
-import com.passivehouse.PassiveHouse.repositories.AlarmStateRepository;
+import com.passivehouse.PassiveHouse.model.AlarmState;
+import com.passivehouse.PassiveHouse.repository.AlarmStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

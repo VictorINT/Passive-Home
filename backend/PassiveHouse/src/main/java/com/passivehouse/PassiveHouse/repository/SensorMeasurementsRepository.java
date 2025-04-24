@@ -1,12 +1,8 @@
-package com.passivehouse.PassiveHouse.repositories;
+package com.passivehouse.PassiveHouse.repository;
 
-import com.passivehouse.PassiveHouse.models.SensorMeasurement;
-import org.springframework.data.domain.Sort;
+import com.passivehouse.PassiveHouse.model.SensorMeasurement;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface SensorMeasurementsRepository extends JpaRepository<SensorMeasurement, Long> {
