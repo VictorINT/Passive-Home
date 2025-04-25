@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Auth Test</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<h2>Google Login Test</h2>
+<div id="g_id_onload"
+     data-client_id="727460143134-rl9i934rq7ggiditis61futjhju97ct8.apps.googleusercontent.com"
+     data-callback="handleCredentialResponse"
+     data-auto_prompt="false">
+</div>
+
+<div class="g_id_signin"
+     data-type="standard"
+     data-size="large"
+     data-theme="outline"
+     data-text="sign_in_with"
+     data-shape="rectangular"
+     data-logo_alignment="left">
+</div>
+
+<pre id="result"></pre>
+
+<script>
+    async function handleCredentialResponse(response) {
+      const idToken = response.credential;
+      document.getElementById("result").innerText = "ID Token:\n" + idToken;
+
+      const res = await fetch("http://localhost:8080/auth/google", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ idToken: idToken })
+      });
+
+      const data = await res.json();
+      document.getElementById("result").innerText += "\n\nBackend JWT:\n" + JSON.stringify(data, null, 2);
+    }
+</script>
+</body>
+</html>
